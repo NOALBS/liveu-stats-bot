@@ -1,0 +1,12 @@
+{
+    "liveu": {
+        "email": "YOUR LIVEU EMAIL",
+        "password": "YOUR LIVEU PASSWORD"
+    },
+    "twitch": {
+        "botUsername": "TWITCH BOT USERNAME",
+        "botOauth": "TWITCH BOT OAUTH",
+        "channel": "YOUR TWITCH CHANNEL",
+        "commands": ["!lustats", "!liveustats", "!lus"]
+    }
+}

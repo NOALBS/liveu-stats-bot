@@ -1,0 +1,26 @@
+{
+    "name": "liveu-stats-bot",
+    "version": "1.0.0",
+    "description": "",
+    "main": "src/app.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "start": "node ./src/app"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/715209/liveu-stats-bot.git"
+    },
+    "author": "Brian Spit",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/715209/liveu-stats-bot/issues"
+    },
+    "homepage": "https://github.com/715209/liveu-stats-bot#readme",
+    "dependencies": {
+        "node-fetch": "^2.6.0",
+        "puppeteer": "^2.0.0",
+        "tmi.js": "^1.5.0",
+        "xml2js": "^0.4.23"
+    }
+}
