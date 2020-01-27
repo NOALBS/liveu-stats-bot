@@ -5,7 +5,7 @@ const tmi = require("tmi.js");
 const xml2js = require("xml2js");
 
 const config = require("../config.json");
-const browser = require("./browser.json");
+let browserData = require("../browser.json");
 
 async function getAuth() {
     const { email, password } = config.liveu;
@@ -20,72 +20,75 @@ async function getAuth() {
     await page.waitForNavigation({ waitUntil: "networkidle0" });
 
     const localStorage = await page.evaluate(() => Object.assign({}, window.localStorage));
+    browserData.token = JSON.parse(localStorage["ngStorage-access_token"]);
+    browserData.unit = JSON.parse(localStorage["ngStorage-mobileunit"]);
 
-    fs.writeFileSync(
-        "./browser.json",
-        JSON.stringify({
-            token: JSON.parse(localStorage["ngStorage-access_token"]),
-            unit: JSON.parse(localStorage["ngStorage-mobileunit"])
-        })
-    );
+    fs.writeFileSync("./browser.json", JSON.stringify(browserData));
 
     await browser.close();
 }
 
 async function getUnits() {
-    let response = await fetch("https://lu-central.liveu.tv/luc/luc-core-web/rest/v0/units/" + browser.unit + "/status/interfaces", {
+    const { unit, token } = browserData;
+
+    let response = await fetch("https://lu-central.liveu.tv/luc/luc-core-web/rest/v0/units/" + unit + "/status/interfaces", {
         credentials: "include",
         headers: {
             accept: "application/json, text/plain, */*",
             "accept-language": "en-US,en;q=0.9",
-            authorization: "Bearer " + browser.token,
+            authorization: "Bearer " + token,
             "sec-fetch-mode": "cors",
             "sec-fetch-site": "same-site"
         },
-        referrer: "https://solo.liveu.tv/dashboard/units/" + browser.unit,
+        referrer: "https://solo.liveu.tv/dashboard/units/" + unit,
         referrerPolicy: "no-referrer-when-downgrade",
         body: null,
         method: "GET",
         mode: "cors"
     });
 
-    if (response.status == 200) {
-        let data = await response.json();
-        let connected = data.filter(e => {
-            return e.connected;
-        });
+    switch (response.status) {
+        case 200:
+            let data = await response.json();
+            let connected = data.filter(e => {
+                return e.connected;
+            });
 
-        connected.forEach(e => {
-            switch (e.port) {
-                case "eth0":
-                    e.port = "Ethernet";
-                    break;
-                case "wlan0":
-                    e.port = "WiFi";
-                    break;
-                case "2":
-                    e.port = "USB1";
-                    break;
-                case "3":
-                    e.port = "USB2";
-                    break;
-                default:
-                    break;
-            }
-        });
+            connected.forEach(e => {
+                switch (e.port) {
+                    case "eth0":
+                        e.port = "Ethernet";
+                        break;
+                    case "wlan0":
+                        e.port = "WiFi";
+                        break;
+                    case "2":
+                        e.port = "USB1";
+                        break;
+                    case "3":
+                        e.port = "USB2";
+                        break;
+                    default:
+                        break;
+                }
+            });
 
-        return connected;
-    } else if (response.status == 204) {
-        return [];
-    } else {
-        console.log("Request failed getting a new auth token");
-        await getAuth();
-        await getUnits();
+            return connected;
+        case 204:
+            return [];
+        case 401:
+            console.log("Request failed getting a new auth token");
+            await getAuth();
+            console.log("Got a new auth token trying again");
+            return await getUnits();
+        default:
+            console.log("Something went wrong when getting the units");
+            break;
     }
 }
 
 async function getBitrate() {
-    const { stats, application, key } = config.rtmp;
+    const { stats, application, key } = config.nginx;
     let bitrate = 0;
 
     const response = await fetch(stats);
@@ -130,8 +133,6 @@ const client = new tmi.Client({
     channels: [channel]
 });
 
-client.connect();
-
 client.on("message", async (channel, tags, message, self) => {
     if (commands.includes(message.toLowerCase())) {
         // (MODEMS) WiFi: 2453 Kbps, USB1: 2548 Kbps, USB2: 2328 Kbps, Ethernet: 2285 Kbps. (TOTAL BITRATE) LiveU to LRT: 10739 Kbps, LRT to RTMP: 8104 Kbps
@@ -167,4 +168,5 @@ client.on("message", async (channel, tags, message, self) => {
     }
 });
 
+client.connect();
 console.log("Started liveu stats bot");
