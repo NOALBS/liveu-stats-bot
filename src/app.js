@@ -119,7 +119,17 @@ async function getBitrate() {
     return bitrate;
 }
 
-const { botUsername, botOauth, channel, commands } = config.twitch;
+let isTimeout = false;
+
+function timeout(ms) {
+    isTimeout = true;
+
+    setTimeout(() => {
+        isTimeout = false;
+    }, ms);
+}
+
+const { botUsername, botOauth, channel, commands, commandCooldown } = config.twitch;
 
 const client = new tmi.Client({
     connection: {
@@ -134,8 +144,9 @@ const client = new tmi.Client({
 });
 
 client.on("message", async (channel, tags, message, self) => {
-    if (commands.includes(message.toLowerCase())) {
+    if (!isTimeout && commands.includes(message.toLowerCase())) {
         // (MODEMS) WiFi: 2453 Kbps, USB1: 2548 Kbps, USB2: 2328 Kbps, Ethernet: 2285 Kbps. (TOTAL BITRATE) LiveU to LRT: 10739 Kbps, LRT to RTMP: 8104 Kbps
+        timeout(1000 * commandCooldown);
         let units = await getUnits();
 
         if (units.length == 0) {

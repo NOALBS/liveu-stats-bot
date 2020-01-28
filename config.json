@@ -7,6 +7,7 @@
         "botUsername": "TWITCH BOT USERNAME",
         "botOauth": "TWITCH BOT OAUTH",
         "channel": "YOUR TWITCH CHANNEL",
-        "commands": ["!lustats", "!liveustats", "!lus"]
+        "commands": ["!lustats", "!liveustats", "!lus"],
+        "commandCooldown": 5
     }
 }
