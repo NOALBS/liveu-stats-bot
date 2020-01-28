@@ -36,6 +36,8 @@ Edit `config.json` to your own settings.
 }
 ```
 
+The nginx part is optional
+
 ## How to run from source
 
 Run the node app by running: `npm start`.
