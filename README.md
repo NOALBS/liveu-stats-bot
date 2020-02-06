@@ -75,3 +75,7 @@ If your LiveU is online, streaming and you're using NGINX you'll see this in cha
 
 
 `Please note: if one of your connections is offline it will NOT show up at all in the stats.`
+
+# Credits:
+### • Cinnabarcorp: Initial Idea, Research & Development, Feedback, Use Case, and Q&A Testing.
+### • 715209: Research & Development.
