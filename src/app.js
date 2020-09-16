@@ -12,14 +12,19 @@ async function getAuth() {
     const browser = await puppeteer.launch({ headless: true });
     const page = await browser.newPage();
 
-    await page.goto("https://solo.liveu.tv/login", { waitUntil: "networkidle2" });
+    await page.goto("https://solo.liveu.tv/login", {
+        waitUntil: "networkidle2",
+    });
 
+    await page.waitForSelector("input[id='txtUsername']", { visible: true });
     await page.type("input[id='txtUsername']", email);
     await page.type("input[id='txtPassword']", password);
     await page.click("button[type='submit']");
     await page.waitForNavigation({ waitUntil: "networkidle0" });
 
-    const localStorage = await page.evaluate(() => Object.assign({}, window.localStorage));
+    const localStorage = await page.evaluate(() =>
+        Object.assign({}, window.localStorage)
+    );
     browserData.token = JSON.parse(localStorage["ngStorage-access_token"]);
     browserData.unit = JSON.parse(localStorage["ngStorage-mobileunit"]);
 
@@ -31,30 +36,35 @@ async function getAuth() {
 async function getUnits() {
     const { unit, token } = browserData;
 
-    let response = await fetch("https://lu-central.liveu.tv/luc/luc-core-web/rest/v0/units/" + unit + "/status/interfaces", {
-        credentials: "include",
-        headers: {
-            accept: "application/json, text/plain, */*",
-            "accept-language": "en-US,en;q=0.9",
-            authorization: "Bearer " + token,
-            "sec-fetch-mode": "cors",
-            "sec-fetch-site": "same-site"
-        },
-        referrer: "https://solo.liveu.tv/dashboard/units/" + unit,
-        referrerPolicy: "no-referrer-when-downgrade",
-        body: null,
-        method: "GET",
-        mode: "cors"
-    });
+    let response = await fetch(
+        "https://lu-central.liveu.tv/luc/luc-core-web/rest/v0/units/" +
+            unit +
+            "/status/interfaces",
+        {
+            credentials: "include",
+            headers: {
+                accept: "application/json, text/plain, */*",
+                "accept-language": "en-US,en;q=0.9",
+                authorization: "Bearer " + token,
+                "sec-fetch-mode": "cors",
+                "sec-fetch-site": "same-site",
+            },
+            referrer: "https://solo.liveu.tv/dashboard/units/" + unit,
+            referrerPolicy: "no-referrer-when-downgrade",
+            body: null,
+            method: "GET",
+            mode: "cors",
+        }
+    );
 
     switch (response.status) {
         case 200:
             let data = await response.json();
-            let connected = data.filter(e => {
+            let connected = data.filter((e) => {
                 return e.connected;
             });
 
-            connected.forEach(e => {
+            connected.forEach((e) => {
                 switch (e.port) {
                     case "eth0":
                         e.port = "Ethernet";
@@ -97,14 +107,16 @@ async function getBitrate() {
     if (response.ok) {
         try {
             xml2js.parseString(data, (err, result) => {
-                const publish = result.rtmp.server[0].application.find(stream => {
-                    return stream.name[0] === application;
-                }).live[0].stream;
+                const publish = result.rtmp.server[0].application.find(
+                    (stream) => {
+                        return stream.name[0] === application;
+                    }
+                ).live[0].stream;
 
                 if (publish == null) {
                     return 0;
                 } else {
-                    const stream = publish.find(stream => {
+                    const stream = publish.find((stream) => {
                         return stream.name[0] === key;
                     });
 
@@ -129,18 +141,24 @@ function timeout(ms) {
     }, ms);
 }
 
-const { botUsername, botOauth, channel, commands, commandCooldown } = config.twitch;
+const {
+    botUsername,
+    botOauth,
+    channel,
+    commands,
+    commandCooldown,
+} = config.twitch;
 
 const client = new tmi.Client({
     connection: {
         reconnect: true,
-        secure: true
+        secure: true,
     },
     identity: {
         username: botUsername,
-        password: botOauth
+        password: botOauth,
     },
-    channels: [channel]
+    channels: [channel],
 });
 
 client.on("message", async (channel, tags, message, self) => {
@@ -158,7 +176,9 @@ client.on("message", async (channel, tags, message, self) => {
         let total = 0;
 
         units.forEach((e, i) => {
-            message += `${e.port}: ${e.uplinkKbps} Kbps${i != units.length - 1 ? ", " : ""}`;
+            message += `${e.port}: ${e.uplinkKbps} Kbps${
+                i != units.length - 1 ? ", " : ""
+            }`;
             total += e.uplinkKbps;
         });
 
