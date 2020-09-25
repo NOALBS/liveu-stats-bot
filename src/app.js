@@ -22,6 +22,8 @@ async function getAuth() {
     await page.click("button[type='submit']");
     await page.waitForNavigation({ waitUntil: "networkidle0" });
 
+    await page.waitForSelector(".editUnitnName", { visible: true });
+
     const localStorage = await page.evaluate(() =>
         Object.assign({}, window.localStorage)
     );
