@@ -16,8 +16,8 @@ async function getAuth() {
         waitUntil: "networkidle2",
     });
 
-    await page.waitForSelector("input[id='txtUsername']", { visible: true });
-    await page.type("input[id='txtUsername']", email);
+    await page.waitForSelector("input[id='txtEmail']", { visible: true });
+    await page.type("input[id='txtEmail']", email);
     await page.type("input[id='txtPassword']", password);
     await page.click("button[type='submit']");
     await page.waitForNavigation({ waitUntil: "networkidle0" });
@@ -27,8 +27,8 @@ async function getAuth() {
     const localStorage = await page.evaluate(() =>
         Object.assign({}, window.localStorage)
     );
-    browserData.token = JSON.parse(localStorage["ngStorage-access_token"]);
-    browserData.unit = JSON.parse(localStorage["ngStorage-mobileunit"]);
+    browserData.token = localStorage["access_token"];
+    browserData.unit = localStorage["currentSelectedUnit"];
 
     fs.writeFileSync("./browser.json", JSON.stringify(browserData));
 
