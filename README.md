@@ -1,3 +1,5 @@
+**Note**: This repository is unmaintained use the [newer version](https://github.com/715209/liveu_stats_bot).
+
 # LIVEU STATS BOT
 
 Adds a chat command to check the current modems and bitrate on the liveu.
